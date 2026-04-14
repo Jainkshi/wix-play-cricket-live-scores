@@ -140,7 +140,7 @@
       /* ── Status helpers ──────────────────────────────────────────────── */
       function showLoading() {
         statusEl.className = 'loading';
-        statusEl.textContent = 'Loading live scores\u2026';
+        statusEl.textContent = 'Loading live scores…';
       }
 
       function hideStatus() {
@@ -168,7 +168,7 @@
         // Remove the previous widget script and DOM content
         const oldScript = document.getElementById('play-cricket-widget-script');
         if (oldScript) {
-          oldScript.parentNode.removeChild(oldScript);
+          oldScript.remove();
         }
         containerEl.innerHTML = '';
 
