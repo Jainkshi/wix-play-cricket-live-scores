@@ -35,6 +35,9 @@ $w.onReady(async () => {
       const selectedSlug = event.target.value;
       const item = items.find((i) => i.slug === selectedSlug);
       if (item) {
+        // Signal the HTML Component to show its loading state immediately,
+        // before the new widget config is posted.
+        $w('#html1').postMessage({ type: 'loading' });
         await loadWidget(item);
       }
     });

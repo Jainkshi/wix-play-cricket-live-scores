@@ -17,39 +17,123 @@
       body {
         font-family: Arial, Helvetica, sans-serif;
         background: transparent;
+        /* Prevent horizontal scroll inside the Wix HTML Component iframe */
+        overflow-x: hidden;
       }
 
-      /* ── Status messages ──────────────────────────────────────────────── */
+      /* ── Content card ─────────────────────────────────────────────────── */
+      /*
+        This is the only outer wrapper we style — it gives the widget area
+        a polished "card" look that sits naturally inside a Wix site without
+        touching Play-Cricket widget internals.
+      */
+      #card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        /* Reserve vertical space so the page doesn't jump on load */
+        min-height: 320px;
+        /* Clip child content at the rounded corners */
+        overflow: hidden;
+        padding: 20px;
+        width: 100%;
+      }
+
+      /* ── Status bar (loading / error / empty) ─────────────────────────── */
+      /*
+        Hidden by default; shown via JS by adding a class.
+        Uses flexbox so the icon/spinner and text align neatly.
+      */
       #status {
-        padding: 12px 16px;
-        border-radius: 4px;
-        font-size: 14px;
+        align-items: center;
+        border-radius: 8px;
         display: none;
+        font-size: 14px;
+        gap: 10px;
+        line-height: 1.5;
+        margin-bottom: 16px;
+        padding: 12px 16px;
       }
 
       #status.loading {
-        display: block;
-        background: #e8f4fd;
-        color: #1565c0;
-        border: 1px solid #90caf9;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+        display: flex;
       }
 
       #status.error {
-        display: block;
-        background: #fdecea;
-        color: #b71c1c;
-        border: 1px solid #ef9a9a;
+        background: #fff1f2;
+        border: 1px solid #fecdd3;
+        color: #be123c;
+        display: flex;
+      }
+
+      #status.empty {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        color: #6b7280;
+        display: flex;
+      }
+
+      /* ── CSS spinner (loading state only) ────────────────────────────── */
+      .spinner {
+        animation: spin 0.8s linear infinite;
+        border: 3px solid currentColor;
+        border-radius: 50%;
+        border-top-color: transparent;
+        flex-shrink: 0;
+        height: 18px;
+        opacity: 0.7;
+        width: 18px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── Status content layout ────────────────────────────────────────── */
+      .status-icon {
+        flex-shrink: 0;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .status-text {
+        flex: 1;
       }
 
       /* ── Widget container ─────────────────────────────────────────────── */
+      /*
+        No min-height here — the card itself provides that.
+        overflow: hidden stops any rogue horizontal overflow from the
+        Play-Cricket widget internals.
+      */
       #widget-container {
+        overflow: hidden;
         width: 100%;
+      }
+
+      /* ── Responsive tweaks ────────────────────────────────────────────── */
+      @media (max-width: 480px) {
+        #card {
+          border-radius: 8px;
+          padding: 14px;
+        }
       }
     </style>
   </head>
   <body>
-    <div id="status"></div>
-    <div id="widget-container"></div>
+    <!-- Outer card: the only element we style to look "native" in Wix -->
+    <div id="card">
+      <!-- Status bar: loading / error / empty — hidden until needed -->
+      <div id="status" role="status" aria-live="polite"></div>
+      <!-- Play-Cricket widget renders here -->
+      <div id="widget-container"></div>
+    </div>
 
     <script>
       /* ── Constants ───────────────────────────────────────────────────── */
@@ -73,6 +157,54 @@
         link.rel = 'stylesheet';
         link.href = CSS_URL;
         document.head.appendChild(link);
+      }
+
+      /* ── XSS guard ───────────────────────────────────────────────────── */
+      /** Escape a string before inserting it as HTML text. */
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      /* ── Status helpers ──────────────────────────────────────────────── */
+      function showLoading() {
+        statusEl.className = 'loading';
+        statusEl.innerHTML =
+          '<span class="spinner" aria-hidden="true"></span>' +
+          '<span class="status-text">Loading live scores\u2026</span>';
+        containerEl.innerHTML = '';
+      }
+
+      function hideStatus() {
+        statusEl.className = '';
+        statusEl.innerHTML = '';
+      }
+
+      /**
+       * Display a polished error banner inside the HTML component.
+       * @param {string} message
+       */
+      function renderError(message) {
+        statusEl.className = 'error';
+        statusEl.innerHTML =
+          '<span class="status-icon" aria-hidden="true">\u26A0\uFE0F</span>' +
+          '<span class="status-text">' + escapeHtml(message) + '</span>';
+        containerEl.innerHTML = '';
+      }
+
+      /**
+       * Display a friendly empty-state banner.
+       * @param {string} message
+       */
+      function renderEmpty(message) {
+        statusEl.className = 'empty';
+        statusEl.innerHTML =
+          '<span class="status-icon" aria-hidden="true">\uD83C\uDFCF</span>' +
+          '<span class="status-text">' + escapeHtml(message) + '</span>';
+        containerEl.innerHTML = '';
       }
 
       /* ── Config validation ───────────────────────────────────────────── */
@@ -137,28 +269,6 @@
         return `${WIDGET_BASE_URL}?${params.toString()}`;
       }
 
-      /* ── Status helpers ──────────────────────────────────────────────── */
-      function showLoading() {
-        statusEl.className = 'loading';
-        statusEl.textContent = 'Loading live scores…';
-      }
-
-      function hideStatus() {
-        statusEl.className = '';
-        statusEl.textContent = '';
-        statusEl.style.display = 'none';
-      }
-
-      /**
-       * Display an error message inside the HTML component.
-       * @param {string} message
-       */
-      function renderError(message) {
-        statusEl.className = 'error';
-        statusEl.textContent = message;
-        containerEl.innerHTML = '';
-      }
-
       /* ── Widget renderer ─────────────────────────────────────────────── */
       /**
        * Clear any existing widget, then render a new one.
@@ -211,6 +321,12 @@
 
         if (config && typeof config === 'object' && 'data' in config) {
           config = config.data;
+        }
+
+        // Handle an explicit loading signal sent by the Velo page on dropdown change.
+        if (config && config.type === 'loading') {
+          showLoading();
+          return;
         }
 
         // Ignore internal Wix / browser messages that are not widget configs
