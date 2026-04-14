@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Play-Cricket Live Scores Widget</title>
+    <style>
+      /* ── Reset & base ─────────────────────────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: transparent;
+      }
+
+      /* ── Status messages ──────────────────────────────────────────────── */
+      #status {
+        padding: 12px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        display: none;
+      }
+
+      #status.loading {
+        display: block;
+        background: #e8f4fd;
+        color: #1565c0;
+        border: 1px solid #90caf9;
+      }
+
+      #status.error {
+        display: block;
+        background: #fdecea;
+        color: #b71c1c;
+        border: 1px solid #ef9a9a;
+      }
+
+      /* ── Widget container ─────────────────────────────────────────────── */
+      #widget-container {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status"></div>
+    <div id="widget-container"></div>
+
+    <script>
+      /* ── Constants ───────────────────────────────────────────────────── */
+      const WIDGET_BASE_URL =
+        'https://www.play-cricket.com/embed_widget/live_scorer_widgets';
+      const CSS_URL =
+        'https://www.play-cricket.com/assets/widget/live_scorer_widget.css';
+      const SCRIPT_SRC =
+        'https://www.play-cricket.com/assets/widget/live_scorer_widget.js';
+      const CSS_ID = 'play-cricket-widget-css';
+
+      /* ── DOM refs ────────────────────────────────────────────────────── */
+      const statusEl = document.getElementById('status');
+      const containerEl = document.getElementById('widget-container');
+
+      /* ── CSS injection (once) ────────────────────────────────────────── */
+      function injectCss() {
+        if (document.getElementById(CSS_ID)) return;
+        const link = document.createElement('link');
+        link.id = CSS_ID;
+        link.rel = 'stylesheet';
+        link.href = CSS_URL;
+        document.head.appendChild(link);
+      }
+
+      /* ── Config validation ───────────────────────────────────────────── */
+      /**
+       * Validate the widget configuration received via postMessage.
+       * @param {Object} config
+       * @returns {{ valid: boolean, reason?: string }}
+       */
+      function validateConfig(config) {
+        if (!config || typeof config !== 'object') {
+          return { valid: false, reason: 'No configuration provided.' };
+        }
+
+        const type = (config.widgetType || '').toLowerCase();
+
+        if (!['club', 'team', 'division'].includes(type)) {
+          return {
+            valid: false,
+            reason: `Unknown widget type "${config.widgetType}". Expected club, team, or division.`,
+          };
+        }
+
+        if (type === 'club' && !config.clubId) {
+          return { valid: false, reason: 'clubId is required for a club widget.' };
+        }
+
+        if (type === 'team' && !config.teamId) {
+          return { valid: false, reason: 'teamId is required for a team widget.' };
+        }
+
+        if (type === 'division' && !config.divisionId) {
+          return {
+            valid: false,
+            reason: 'divisionId is required for a division widget.',
+          };
+        }
+
+        return { valid: true };
+      }
+
+      /* ── URL builder ─────────────────────────────────────────────────── */
+      /**
+       * Build the full Play-Cricket widget embed URL.
+       * @param {Object} config
+       * @returns {string}
+       */
+      function buildWidgetUrl(config) {
+        const params = new URLSearchParams();
+        const type = config.widgetType.toLowerCase();
+        const days = typeof config.days === 'number' ? config.days : 0;
+
+        if (type === 'club') {
+          params.set('club_id', config.clubId);
+        } else if (type === 'team') {
+          params.set('team_id', config.teamId);
+        } else if (type === 'division') {
+          params.set('division_id', config.divisionId);
+        }
+
+        params.set('days', days);
+
+        return `${WIDGET_BASE_URL}?${params.toString()}`;
+      }
+
+      /* ── Status helpers ──────────────────────────────────────────────── */
+      function showLoading() {
+        statusEl.className = 'loading';
+        statusEl.textContent = 'Loading live scores\u2026';
+      }
+
+      function hideStatus() {
+        statusEl.className = '';
+        statusEl.textContent = '';
+        statusEl.style.display = 'none';
+      }
+
+      /**
+       * Display an error message inside the HTML component.
+       * @param {string} message
+       */
+      function renderError(message) {
+        statusEl.className = 'error';
+        statusEl.textContent = message;
+        containerEl.innerHTML = '';
+      }
+
+      /* ── Widget renderer ─────────────────────────────────────────────── */
+      /**
+       * Clear any existing widget, then render a new one.
+       * @param {Object} config
+       */
+      function renderWidget(config) {
+        // Remove the previous widget script and DOM content
+        const oldScript = document.getElementById('play-cricket-widget-script');
+        if (oldScript) {
+          oldScript.parentNode.removeChild(oldScript);
+        }
+        containerEl.innerHTML = '';
+
+        // Inject Play-Cricket CSS (idempotent)
+        injectCss();
+
+        const widgetUrl = buildWidgetUrl(config);
+
+        // The Play-Cricket embed expects a <div> with a data-src attribute,
+        // plus the widget script to bootstrap it.
+        const widgetDiv = document.createElement('div');
+        widgetDiv.className = 'play-cricket-widget';
+        widgetDiv.setAttribute('data-src', widgetUrl);
+        containerEl.appendChild(widgetDiv);
+
+        // Inject the Play-Cricket widget bootstrapper script
+        const script = document.createElement('script');
+        script.id = 'play-cricket-widget-script';
+        script.src = SCRIPT_SRC;
+        script.async = true;
+
+        script.onload = () => {
+          hideStatus();
+        };
+
+        script.onerror = () => {
+          renderError(
+            'Failed to load the Play-Cricket widget. Please check your internet connection and try again.'
+          );
+        };
+
+        document.body.appendChild(script);
+      }
+
+      /* ── postMessage listener ────────────────────────────────────────── */
+      window.addEventListener('message', (event) => {
+        // In a Wix HTML Component, postMessage data arrives as event.data.
+        // The Wix platform may wrap the payload; unwrap if necessary.
+        let config = event.data;
+
+        if (config && typeof config === 'object' && 'data' in config) {
+          config = config.data;
+        }
+
+        // Ignore internal Wix / browser messages that are not widget configs
+        if (!config || typeof config !== 'object' || !('widgetType' in config)) {
+          return;
+        }
+
+        showLoading();
+
+        const { valid, reason } = validateConfig(config);
+
+        if (!valid) {
+          renderError(reason || 'Invalid widget configuration.');
+          return;
+        }
+
+        renderWidget(config);
+      });
+    </script>
+  </body>
+</html>
