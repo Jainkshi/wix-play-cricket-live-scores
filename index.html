@@ -74,6 +74,59 @@
       footer a:hover {
         color: #1e40af;
       }
+
+      /* ── Status bar (loading / empty) ─────────────────────────────────── */
+      #status-message,
+      #fallback-message {
+        align-items: center;
+        border-radius: 8px;
+        display: flex;
+        font-size: 14px;
+        gap: 10px;
+        padding: 12px 16px;
+      }
+
+      #status-message {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+        margin-bottom: 16px;
+      }
+
+      #fallback-message {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        color: #6b7280;
+        display: none;
+      }
+
+      /* ── CSS spinner ──────────────────────────────────────────────────── */
+      .spinner {
+        animation: spin 0.8s linear infinite;
+        border: 3px solid currentColor;
+        border-radius: 50%;
+        border-top-color: transparent;
+        flex-shrink: 0;
+        height: 18px;
+        opacity: 0.7;
+        width: 18px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .status-icon {
+        flex-shrink: 0;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .status-text {
+        flex: 1;
+      }
     </style>
   </head>
   <body>
@@ -87,6 +140,16 @@
       </header>
 
       <div class="card">
+        <!-- Loading indicator: shown while the widget script is fetching data -->
+        <div id="status-message" role="status" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="status-text">Loading live scores…</span>
+        </div>
+        <!-- Fallback: shown when the widget returns no live match data -->
+        <div id="fallback-message" role="status" aria-live="polite">
+          <span class="status-icon" aria-hidden="true">🏏</span>
+          <span class="status-text">No live match available</span>
+        </div>
         <!--
           Play-Cricket live scorer widget embed.
 
@@ -113,12 +176,83 @@
 
     <!--
       Official Play-Cricket live scorer widget bootstrapper.
-      This script scans the page for anchor elements whose href points to
-      the embed_widget endpoint and renders the live score widget in place.
+      Loaded dynamically so we can detect whether it renders any live match
+      data and show a fallback message when none is available.
     -->
-    <script
-      src="https://www.play-cricket.com/assets/widget/live_scorer_widget.js"
-      async
-    ></script>
+    <script>
+      (function () {
+        var card = document.querySelector('.card');
+        var statusEl = document.getElementById('status-message');
+        var fallbackEl = document.getElementById('fallback-message');
+
+        /** Milliseconds to wait for the widget to render before showing the fallback. */
+        var CONTENT_TIMEOUT_MS = 4000;
+
+        /** Returns true if the element is part of our own loading/fallback UI (not widget content). */
+        function isNonWidgetElement(el) {
+          return (
+            el.id === 'status-message' ||
+            el.id === 'fallback-message' ||
+            el.classList.contains('play-cricket-widget-link')
+          );
+        }
+
+        function hasWidgetContent() {
+          return Array.from(card.children).some(function (child) {
+            return !isNonWidgetElement(child);
+          });
+        }
+
+        function hideStatus() {
+          statusEl.style.display = 'none';
+        }
+
+        function showFallback() {
+          statusEl.style.display = 'none';
+          fallbackEl.style.display = 'flex';
+        }
+
+        var script = document.createElement('script');
+        script.src =
+          'https://www.play-cricket.com/assets/widget/live_scorer_widget.js';
+        script.async = true;
+
+        script.onload = function () {
+          // If the widget already rendered synchronously, hide the loading state.
+          if (hasWidgetContent()) {
+            hideStatus();
+            return;
+          }
+
+          var done = false;
+
+          // Watch for the widget adding DOM nodes to the card.
+          var observer = new MutationObserver(function () {
+            if (!done && hasWidgetContent()) {
+              done = true;
+              observer.disconnect();
+              hideStatus();
+            }
+          });
+
+          observer.observe(card, { childList: true });
+
+          // If nothing is rendered within 4 seconds, treat as "no live match".
+          setTimeout(function () {
+            if (!done) {
+              done = true;
+              observer.disconnect();
+              showFallback();
+            }
+          }, CONTENT_TIMEOUT_MS);
+        };
+
+        script.onerror = function () {
+          showFallback();
+        };
+
+        document.body.appendChild(script);
+      })();
+    </script>
   </body>
 </html>
