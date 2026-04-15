@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bracknell Cricket Club - Live Scores (Test)</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f3f4f6;
+        color: #1f2937;
+        min-height: 100vh;
+        padding: 32px 16px;
+      }
+
+      .container {
+        margin: 0 auto;
+        max-width: 800px;
+      }
+
+      header {
+        margin-bottom: 24px;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      header p {
+        color: #6b7280;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        min-height: 320px;
+        overflow: hidden;
+        padding: 24px;
+        width: 100%;
+      }
+
+      /* Play-Cricket widget anchor — hidden, used by the widget script */
+      .play-cricket-widget-link {
+        display: none;
+      }
+
+      footer {
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      footer a {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+
+      footer a:hover {
+        color: #1e40af;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Bracknell Cricket Club – Live Scores</h1>
+        <p>
+          Test page for the Play-Cricket live scorer widget.<br />
+          Widget data is loaded directly from Play-Cricket using the official embed script.
+        </p>
+      </header>
+
+      <div class="card">
+        <!--
+          Play-Cricket live scorer widget embed.
+
+          The widget script reads this anchor's href to determine which club's
+          data to fetch.
+
+          HOW TO FIND THE BRACKNELL CC CLUB ID:
+            1. Visit https://www.play-cricket.com/Widgets
+            2. Select widget type "Live Scorer"
+            3. Search for "Bracknell Cricket Club"
+            4. The generated embed URL will contain &club_id=XXXXX
+            5. Replace BRACKNELL_CLUB_ID below with that numeric value.
+        -->
+        <a
+          class="play-cricket-widget-link"
+          href="https://www.play-cricket.com/embed_widget/live_scorer_widgets?club_id=BRACKNELL_CLUB_ID&amp;days=0"
+        ></a>
+      </div>
+
+      <footer>
+        <p>
+          If the widget does not load,
+          <a href="https://www.play-cricket.com/" target="_blank" rel="noopener noreferrer">
+            view scores on Play-Cricket
+          </a>.
+        </p>
+      </footer>
+    </div>
+
+    <!--
+      Official Play-Cricket live scorer widget bootstrapper.
+      This script scans the page for anchor elements whose href points to
+      the embed_widget endpoint and renders the live score widget in place.
+    -->
+    <script
+      src="https://www.play-cricket.com/assets/widget/live_scorer_widget.js"
+      async
+    ></script>
+  </body>
+</html>
