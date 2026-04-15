@@ -144,6 +144,8 @@
       const SCRIPT_SRC =
         'https://www.play-cricket.com/assets/widget/live_scorer_widget.js';
       const CSS_ID = 'play-cricket-widget-css';
+      /** Milliseconds to wait for the widget to render before showing the fallback. */
+      const CONTENT_TIMEOUT_MS = 4000;
 
       /* ── DOM refs ────────────────────────────────────────────────────── */
       const statusEl = document.getElementById('status');
@@ -301,7 +303,44 @@
         script.async = true;
 
         script.onload = () => {
-          hideStatus();
+          const widgetDiv = containerEl.querySelector('.play-cricket-widget');
+
+          // Guard: widget div should always exist at this point, but be safe.
+          if (!widgetDiv) {
+            renderEmpty('No live match available');
+            return;
+          }
+
+          // If the widget already rendered synchronously, hide the loading state.
+          if (widgetDiv.children.length > 0 || widgetDiv.textContent.trim().length > 0) {
+            hideStatus();
+            return;
+          }
+
+          let done = false;
+
+          // Watch for the Play-Cricket script populating the widget div.
+          const observer = new MutationObserver(() => {
+            if (
+              !done &&
+              (widgetDiv.children.length > 0 || widgetDiv.textContent.trim().length > 0)
+            ) {
+              done = true;
+              observer.disconnect();
+              hideStatus();
+            }
+          });
+
+          observer.observe(widgetDiv, { childList: true, subtree: true, characterData: true });
+
+          // If nothing is rendered within CONTENT_TIMEOUT_MS, treat as "no live match".
+          setTimeout(() => {
+            if (!done) {
+              done = true;
+              observer.disconnect();
+              renderEmpty('No live match available');
+            }
+          }, CONTENT_TIMEOUT_MS);
         };
 
         script.onerror = () => {
