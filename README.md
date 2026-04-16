@@ -9,11 +9,11 @@ Production-ready Play-Cricket **Live Scores** embeds for Wix using a simple, rel
 
 ## Files to use
 
-- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/club-widget.html`
-- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/team-widget.html`
-- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/division-widget.html`
-- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/score-widget-template.html` (optional scalable template)
-- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/IMPLEMENTATION-NOTES.md`
+- `./club-widget.html`
+- `./team-widget.html`
+- `./division-widget.html`
+- `./score-widget-template.html` (optional scalable template)
+- `./IMPLEMENTATION-NOTES.md`
 
 Each widget file is self-contained with:
 

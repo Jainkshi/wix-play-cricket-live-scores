@@ -101,13 +101,24 @@
 
       function loadScriptOnce() {
         const existing = document.getElementById(SCRIPT_ID);
-        if (existing) return Promise.resolve();
+        if (existing) {
+          if (existing.dataset.loaded === 'true') return Promise.resolve();
+          return new Promise((resolve, reject) => {
+            existing.addEventListener('load', () => resolve(), { once: true });
+            existing.addEventListener('error', () => reject(new Error('Failed to load Play-Cricket script.')), {
+              once: true
+            });
+          });
+        }
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
           script.id = SCRIPT_ID;
           script.async = true;
           script.src = clean(SCRIPT);
-          script.onload = resolve;
+          script.onload = () => {
+            script.dataset.loaded = 'true';
+            resolve();
+          };
           script.onerror = () => reject(new Error('Failed to load Play-Cricket script.'));
           document.body.appendChild(script);
         });
@@ -133,20 +144,24 @@
 
           await loadScriptOnce();
 
-          const timeout = setTimeout(() => {
-            if (!widgetEl.children.length && !widgetEl.textContent.trim()) {
-              setStatus('empty', 'No live match available right now.');
-            }
-          }, 5000);
-
+          let done = false;
           const observer = new MutationObserver(() => {
-            if (widgetEl.children.length || widgetEl.textContent.trim()) {
-              clearTimeout(timeout);
+            if (!done && (widgetEl.children.length || widgetEl.textContent.trim())) {
+              done = true;
               observer.disconnect();
+              clearTimeout(timeout);
               hideStatus();
             }
           });
           observer.observe(widgetEl, { childList: true, subtree: true, characterData: true });
+
+          const timeout = setTimeout(() => {
+            if (!done && !widgetEl.children.length && !widgetEl.textContent.trim()) {
+              done = true;
+              observer.disconnect();
+              setStatus('empty', 'No live match available right now.');
+            }
+          }, 5000);
         } catch (error) {
           setStatus('error', error.message || 'Unable to load live scores right now.');
         }
