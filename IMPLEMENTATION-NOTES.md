@@ -24,6 +24,7 @@ At the top of each file, edit the `CONFIG` object:
 1. Add an **Embed HTML** element.
 2. Open Embed settings and paste the **entire** HTML file content.
 3. Resize the embed (desktop usually `900px`–`1200px` tall).
+   - For the included demo page, the iframe uses `950px` on desktop and `1100px` on smaller screens.
 4. Repeat for each team/division version you want to show.
 
 ### 4) Known limitations
