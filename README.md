@@ -1,133 +1,59 @@
 # wix-play-cricket-live-scores
 
-BCC Play Cricket – dynamic live scores page built with **Wix CMS + Velo + HTML Component**.
+Production-ready Play-Cricket **Live Scores** embeds for Wix using a simple, reliable architecture:
 
----
+- one dedicated Wix page (`Live Scores`)
+- native Wix selector UI at the top
+- one large Embed HTML panel below
+- self-contained widget HTML files (no Velo bootstrapping required)
 
-## Overview
+## Files to use
 
-This project delivers a Wix page that:
+- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/club-widget.html`
+- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/team-widget.html`
+- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/division-widget.html`
+- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/score-widget-template.html` (optional scalable template)
+- `/home/runner/work/wix-play-cricket-live-scores/wix-play-cricket-live-scores/IMPLEMENTATION-NOTES.md`
 
-- Reads widget configurations from a Wix CMS collection (`LiveScoreWidgets`)
-- Presents them in a dropdown so visitors can switch between club, team, and division live scores
-- Renders the official [Play-Cricket live scorer widget](https://www.play-cricket.com) inside a Wix HTML Component
-- Handles errors and loading states gracefully
+Each widget file is self-contained with:
 
----
+- editable config block at the top of the script
+- responsive shell/card layout
+- loading, empty, and error states
+- HTTPS-only Play-Cricket script/CSS loading
+- no dependency on Wix Page Code / Velo for widget bootstrap
 
-## Repository Structure
+## Recommended Wix setup
 
-```
-src/
-  pages/
-    live-scores.js       # Wix Velo page code
-  html/
-    widget-loader.html   # Wix HTML Component
-docs/
-  cms-schema.md          # CMS collection schema & sample data
-README.md
-```
+1. Create a page named **Live Scores**.
+2. Add a hero section:
+   - Title: `Live Scores`
+   - Text: `Follow club, team, and division scores in one place.`
+3. Add a native Wix selector area (buttons/cards/repeater).
+4. Add one large **Embed HTML** element as the main widget panel.
+5. Add fallback helper text below the panel.
+6. Paste one full widget file into each Embed HTML instance you use.
 
----
+## Switching patterns
 
-## Setup Instructions
+### Reliable launch pattern
 
-### Step 1 – Create the CMS Collection
+Use separate pages or separate states/containers:
 
-1. Open your Wix site in the **Wix Editor**.
-2. Go to **CMS → + New Collection**.
-3. Name the collection **`LiveScoreWidgets`** (the ID must match exactly).
-4. Add the fields described in [`docs/cms-schema.md`](docs/cms-schema.md).
-5. Set **Read** permissions to **Anyone** and **Write** to **Admin**.
-6. Enter your sample records (see the schema doc for examples).
+- club page/state → `club-widget.html`
+- team page/state → `team-widget.html`
+- division page/state → `division-widget.html`
 
-### Step 2 – Create the Live Scores Page
+### Scalable pattern
 
-1. In the Wix Editor, add a **new page** named `Live Scores`.
-2. Add the following elements and set their IDs:
+Use `score-widget-template.html` to generate more copies (e.g. 1st XI, 2nd XI, Women’s XI, Division 1, Division 2).
 
-   | Element          | Wix Type        | ID                 |
-   | ---------------- | --------------- | ------------------ |
-   | Widget selector  | Dropdown        | `#widgetDropdown`  |
-   | Page heading     | Text            | `#titleText`       |
-   | Short blurb      | Text            | `#descText`        |
-   | Widget frame     | HTML Component  | `#html1`           |
+## Important constraints
 
-### Step 3 – Add the HTML Component Code
+- Keep widget target markup and script loader in the same HTML document.
+- Do not split widget rendering across Velo page code and Embed HTML.
+- Paste the complete widget HTML into Wix Embed HTML (not script-only snippets).
 
-1. Click the **HTML Component** (`#html1`) on the canvas.
-2. In its settings panel choose **Code**.
-3. Paste the entire contents of [`src/html/widget-loader.html`](src/html/widget-loader.html).
-4. Save.
+## Local preview
 
-### Step 4 – Add the Velo Page Code
-
-1. Open the **Velo Dev Mode** panel (toggle **Dev Mode** in the Editor toolbar).
-2. In the left-hand file tree expand **Page Code** and open the file for your `Live Scores` page.
-3. Replace any existing code with the contents of [`src/pages/live-scores.js`](src/pages/live-scores.js).
-4. Save.
-
-### Step 5 – Publish & Verify
-
-1. Click **Publish** in the Wix Editor.
-2. Open the published page.
-3. Confirm that:
-   - The dropdown is populated with your CMS widget titles.
-   - The first widget loads automatically.
-   - Switching the dropdown replaces the widget correctly.
-   - All three widget types (club / team / division) work.
-
----
-
-## How It Works
-
-```
-Visitor opens Live Scores page
-        │
-        ▼
-Velo page code queries LiveScoreWidgets CMS
-  (filter: isActive = true, sort: sortOrder ASC)
-        │
-        ▼
-Dropdown populated with widget titles
-First widget loaded automatically
-        │
-        ▼
-loadWidget(item)
-  ├── Updates #titleText and #descText
-  └── Calls #html1.postMessage(config)
-                │
-                ▼
-        widget-loader.html receives message
-          ├── validateConfig(config)
-          ├── buildWidgetUrl(config)
-          └── renderWidget(config)
-                  ├── Clears previous widget
-                  ├── Injects Play-Cricket CSS (once)
-                  └── Injects Play-Cricket JS (per render)
-```
-
----
-
-## CMS Collection Schema
-
-See [`docs/cms-schema.md`](docs/cms-schema.md) for the full field list and sample records.
-
----
-
-## Widget Types
-
-| `widgetType` | Required field | Play-Cricket URL param |
-| ------------ | -------------- | ---------------------- |
-| `club`       | `clubId`       | `club_id`              |
-| `team`       | `teamId`       | `team_id`              |
-| `division`   | `divisionId`   | `division_id`          |
-
----
-
-## Constraints
-
-- Uses **only** the official Play-Cricket embed widget (no direct API polling).
-- Only **one** widget is rendered at a time; the previous widget is removed before rendering the next.
-- No external JavaScript frameworks – plain vanilla JS in the HTML Component.
-- Fully **CMS-driven**: adding or editing widget configurations requires no code changes.
+Open `index.html` to view a simple one-page selector + panel demo that switches between the three standalone widget files.

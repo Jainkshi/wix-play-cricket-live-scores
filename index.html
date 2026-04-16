@@ -3,256 +3,151 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bracknell Cricket Club - Live Scores (Test)</title>
+    <title>Live Scores Hub Demo</title>
     <style>
-      *,
-      *::before,
-      *::after {
+      :root {
+        --bg: #f4f7fb;
+        --panel: #ffffff;
+        --text: #0f172a;
+        --muted: #475569;
+        --line: #dbe2ea;
+        --primary: #1d4ed8;
+      }
+
+      * {
         box-sizing: border-box;
-        margin: 0;
-        padding: 0;
       }
 
       body {
-        font-family: Arial, Helvetica, sans-serif;
-        background: #f3f4f6;
-        color: #1f2937;
-        min-height: 100vh;
-        padding: 32px 16px;
+        margin: 0;
+        font-family: Inter, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: clamp(16px, 2.5vw, 28px);
       }
 
-      .container {
+      .shell {
         margin: 0 auto;
-        max-width: 800px;
+        max-width: 1160px;
       }
 
-      header {
-        margin-bottom: 24px;
-        text-align: center;
+      .hero,
+      .selector,
+      .widget,
+      .help {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        margin-bottom: 16px;
+        padding: clamp(14px, 2.2vw, 22px);
       }
 
-      header h1 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin-bottom: 8px;
+      h1 {
+        margin: 0;
+        font-size: clamp(1.4rem, 2.3vw, 2rem);
       }
 
-      header p {
-        color: #6b7280;
-        font-size: 0.95rem;
-        line-height: 1.5;
+      .hero p {
+        color: var(--muted);
+        margin: 8px 0 0;
       }
 
-      .card {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-        min-height: 320px;
-        overflow: hidden;
-        padding: 24px;
+      .selector-buttons {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+
+      button {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 10px;
+        color: #1e3a8a;
+        cursor: pointer;
+        font: inherit;
+        padding: 10px 12px;
+      }
+
+      button.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+      }
+
+      .widget iframe {
+        border: 0;
+        border-radius: 10px;
+        display: block;
+        min-height: 950px;
         width: 100%;
       }
 
-      /* Play-Cricket widget anchor — hidden, used by the widget script */
-      .play-cricket-widget-link {
-        display: none;
+      .help {
+        color: var(--muted);
+        font-size: 0.94rem;
+        line-height: 1.55;
       }
 
-      footer {
-        color: #6b7280;
-        font-size: 0.85rem;
-        margin-top: 20px;
-        text-align: center;
+      .help a {
+        color: var(--primary);
       }
 
-      footer a {
-        color: #1d4ed8;
-        text-decoration: underline;
-      }
-
-      footer a:hover {
-        color: #1e40af;
-      }
-
-      /* ── Status bar (loading / empty) ─────────────────────────────────── */
-      #status-message,
-      #fallback-message {
-        align-items: center;
-        border-radius: 8px;
-        display: flex;
-        font-size: 14px;
-        gap: 10px;
-        padding: 12px 16px;
-      }
-
-      #status-message {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        color: #1d4ed8;
-        margin-bottom: 16px;
-      }
-
-      #fallback-message {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        color: #6b7280;
-        display: none;
-      }
-
-      /* ── CSS spinner ──────────────────────────────────────────────────── */
-      .spinner {
-        animation: spin 0.8s linear infinite;
-        border: 3px solid currentColor;
-        border-radius: 50%;
-        border-top-color: transparent;
-        flex-shrink: 0;
-        height: 18px;
-        opacity: 0.7;
-        width: 18px;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
+      @media (max-width: 768px) {
+        .widget iframe {
+          min-height: 1100px;
         }
-      }
-
-      .status-icon {
-        flex-shrink: 0;
-        font-size: 18px;
-        line-height: 1;
-      }
-
-      .status-text {
-        flex: 1;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <header>
-        <h1>Bracknell Cricket Club – Live Scores</h1>
-        <p>
-          Test page for the Play-Cricket live scorer widget.<br />
-          Widget data is loaded directly from Play-Cricket using the official embed script.
-        </p>
-      </header>
+    <main class="shell">
+      <section class="hero">
+        <h1>Live Scores</h1>
+        <p>Follow club, team, and division scores in one place.</p>
+      </section>
 
-      <div class="card">
-        <!-- Loading indicator: shown while the widget script is fetching data -->
-        <div id="status-message" role="status" aria-live="polite">
-          <span class="spinner" aria-hidden="true"></span>
-          <span class="status-text">Loading live scores…</span>
+      <section class="selector" aria-label="Score selector">
+        <div class="selector-buttons">
+          <button type="button" data-file="club-widget.html" class="active">Club Scores</button>
+          <button type="button" data-file="team-widget.html">1st XI</button>
+          <button type="button" data-file="team-widget.html">2nd XI</button>
+          <button type="button" data-file="team-widget.html">Women’s XI</button>
+          <button type="button" data-file="division-widget.html">Division 1</button>
+          <button type="button" data-file="division-widget.html">Division 2</button>
         </div>
-        <!-- Fallback: shown when the widget returns no live match data -->
-        <div id="fallback-message" role="status" aria-live="polite">
-          <span class="status-icon" aria-hidden="true">🏏</span>
-          <span class="status-text">No live match available</span>
-        </div>
-        <!--
-          Play-Cricket live scorer widget embed.
+      </section>
 
-          The widget script reads this anchor's href to determine which club's
-          data to fetch.
+      <section class="widget" aria-label="Live score panel">
+        <iframe
+          id="widgetFrame"
+          title="Selected live scores widget"
+          src="./club-widget.html"
+          loading="lazy"
+        ></iframe>
+      </section>
 
-          Bracknell Cricket Club ID on Play-Cricket: 1312
-        -->
-        <a
-          class="play-cricket-widget-link"
-          href="https://www.play-cricket.com/embed_widget/live_scorer_widgets?club_id=1312&amp;days=0"
-        ></a>
-      </div>
+      <section class="help">
+        If scores are not currently available, there may be no live match in progress.
+        You can also verify updates directly on
+        <a href="https://www.play-cricket.com/" target="_blank" rel="noopener noreferrer">Play-Cricket</a>.
+      </section>
+    </main>
 
-      <footer>
-        <p>
-          If the widget does not load,
-          <a href="https://www.play-cricket.com/" target="_blank" rel="noopener noreferrer">
-            view scores on Play-Cricket
-          </a>.
-        </p>
-      </footer>
-    </div>
-
-    <!--
-      Official Play-Cricket live scorer widget bootstrapper.
-      Loaded dynamically so we can detect whether it renders any live match
-      data and show a fallback message when none is available.
-    -->
     <script>
-      (function () {
-        var card = document.querySelector('.card');
-        var statusEl = document.getElementById('status-message');
-        var fallbackEl = document.getElementById('fallback-message');
+      const buttons = Array.from(document.querySelectorAll('button[data-file]'));
+      const widgetFrame = document.getElementById('widgetFrame');
 
-        /** Milliseconds to wait for the widget to render before showing the fallback. */
-        var CONTENT_TIMEOUT_MS = 4000;
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const file = (button.dataset.file || '').trim();
+          if (!file) return;
 
-        /** Returns true if the element is part of our own loading/fallback UI (not widget content). */
-        function isNonWidgetElement(el) {
-          return (
-            el.id === 'status-message' ||
-            el.id === 'fallback-message' ||
-            el.classList.contains('play-cricket-widget-link')
-          );
-        }
-
-        function hasWidgetContent() {
-          return Array.from(card.children).some(function (child) {
-            return !isNonWidgetElement(child);
-          });
-        }
-
-        function hideStatus() {
-          statusEl.style.display = 'none';
-        }
-
-        function showFallback() {
-          statusEl.style.display = 'none';
-          fallbackEl.style.display = 'flex';
-        }
-
-        var script = document.createElement('script');
-        script.src =
-          'https://www.play-cricket.com/assets/widget/live_scorer_widget.js';
-        script.async = true;
-
-        script.onload = function () {
-          // If the widget already rendered synchronously, hide the loading state.
-          if (hasWidgetContent()) {
-            hideStatus();
-            return;
-          }
-
-          var done = false;
-
-          // Watch for the widget adding DOM nodes to the card.
-          var observer = new MutationObserver(function () {
-            if (!done && hasWidgetContent()) {
-              done = true;
-              observer.disconnect();
-              hideStatus();
-            }
-          });
-
-          observer.observe(card, { childList: true });
-
-          // If nothing is rendered within 4 seconds, treat as "no live match".
-          setTimeout(function () {
-            if (!done) {
-              done = true;
-              observer.disconnect();
-              showFallback();
-            }
-          }, CONTENT_TIMEOUT_MS);
-        };
-
-        script.onerror = function () {
-          showFallback();
-        };
-
-        document.body.appendChild(script);
-      })();
+          buttons.forEach((b) => b.classList.remove('active'));
+          button.classList.add('active');
+          widgetFrame.src = './' + file;
+        });
+      });
     </script>
   </body>
 </html>
