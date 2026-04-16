@@ -136,16 +136,23 @@
     <script>
       const buttons = Array.from(document.querySelectorAll('button[data-file]'));
       const widgetFrame = document.getElementById('widgetFrame');
-      const allowedFiles = new Set(['club-widget.html', 'team-widget.html', 'division-widget.html']);
+      const allowedFiles = new Map([
+        ['club-widget.html', './club-widget.html'],
+        ['team-widget.html', './team-widget.html'],
+        ['division-widget.html', './division-widget.html']
+      ]);
 
       buttons.forEach((button) => {
         button.addEventListener('click', () => {
           const file = (button.dataset.file || '').trim();
-          if (!allowedFiles.has(file)) return;
+          const safePath = allowedFiles.get(file);
+          if (!safePath) return;
+          const safeUrl = new URL(safePath, window.location.href);
+          if (safeUrl.origin !== window.location.origin) return;
 
           buttons.forEach((b) => b.classList.remove('active'));
           button.classList.add('active');
-          widgetFrame.src = './' + file;
+          widgetFrame.src = safeUrl.toString();
         });
       });
     </script>
