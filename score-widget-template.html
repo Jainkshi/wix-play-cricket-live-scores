@@ -64,8 +64,8 @@
       const statusEl = document.getElementById('status');
       const widgetRootEl = document.getElementById('widget-root');
 
-      const clean = (value) => String(value || '').replace(/\s+/g, '').trim();
-      const cleanValue = (value) => String(value || '').trim();
+      const normalizeUrl = (value) => String(value || '').replace(/\s+/g, '').trim();
+      const normalizeValue = (value) => String(value || '').trim();
 
       const setStatus = (kind, text) => {
         statusEl.className = 'status ' + kind;
@@ -80,29 +80,29 @@
       };
 
       function buildUrl() {
-        const type = cleanValue(CONFIG.widgetType).toLowerCase();
+        const type = normalizeValue(CONFIG.widgetType).toLowerCase();
         const params = new URLSearchParams();
         if (type === 'club') {
-          const clubId = cleanValue(CONFIG.clubId);
+          const clubId = normalizeValue(CONFIG.clubId);
           if (!clubId) throw new Error('clubId is required when widgetType is club.');
           params.set('club_id', clubId);
         } else if (type === 'team') {
-          const teamId = cleanValue(CONFIG.teamId);
+          const teamId = normalizeValue(CONFIG.teamId);
           if (!teamId) throw new Error('teamId is required when widgetType is team.');
           params.set('team_id', teamId);
         } else if (type === 'division') {
-          const divisionId = cleanValue(CONFIG.divisionId);
+          const divisionId = normalizeValue(CONFIG.divisionId);
           if (!divisionId) throw new Error('divisionId is required when widgetType is division.');
           params.set('division_id', divisionId);
         }
         else throw new Error('widgetType must be club, team, or division.');
         params.set('days', String(Number.isFinite(Number(CONFIG.days)) ? Number(CONFIG.days) : 0));
-        return clean(BASE) + '?' + params.toString();
+        return normalizeUrl(BASE) + '?' + params.toString();
       }
 
       function injectCssOnce() {
         if (document.getElementById(CSS_ID)) return;
-        const cssUrl = clean(CSS);
+        const cssUrl = normalizeUrl(CSS);
         if (!cssUrl.startsWith('https://')) throw new Error('Widget CSS URL must use https://');
         const link = document.createElement('link');
         link.id = CSS_ID;
@@ -112,7 +112,7 @@
       }
 
       function loadScriptOnce() {
-        const scriptUrl = clean(SCRIPT);
+        const scriptUrl = normalizeUrl(SCRIPT);
         if (!scriptUrl.startsWith('https://')) throw new Error('Widget script URL must use https://');
 
         const existing = document.getElementById(SCRIPT_ID);
@@ -130,11 +130,11 @@
           script.id = SCRIPT_ID;
           script.async = true;
           script.src = scriptUrl;
-          script.onload = () => {
+          script.addEventListener('load', () => {
             script.dataset.loaded = 'true';
             resolve();
-          };
-          script.onerror = () => reject(new Error('Failed to load Play-Cricket script.'));
+          });
+          script.addEventListener('error', () => reject(new Error('Failed to load Play-Cricket script.')));
           document.body.appendChild(script);
         });
       }

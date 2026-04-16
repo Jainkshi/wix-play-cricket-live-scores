@@ -123,7 +123,6 @@
           id="widgetFrame"
           title="Selected live scores widget"
           src="./club-widget.html"
-          loading="lazy"
         ></iframe>
       </section>
 
@@ -137,11 +136,12 @@
     <script>
       const buttons = Array.from(document.querySelectorAll('button[data-file]'));
       const widgetFrame = document.getElementById('widgetFrame');
+      const allowedFiles = new Set(['club-widget.html', 'team-widget.html', 'division-widget.html']);
 
       buttons.forEach((button) => {
         button.addEventListener('click', () => {
           const file = (button.dataset.file || '').trim();
-          if (!file) return;
+          if (!allowedFiles.has(file)) return;
 
           buttons.forEach((b) => b.classList.remove('active'));
           button.classList.add('active');
