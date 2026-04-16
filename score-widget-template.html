@@ -112,6 +112,9 @@
       }
 
       function loadScriptOnce() {
+        const scriptUrl = clean(SCRIPT);
+        if (!scriptUrl.startsWith('https://')) throw new Error('Widget script URL must use https://');
+
         const existing = document.getElementById(SCRIPT_ID);
         if (existing) {
           if (existing.dataset.loaded === 'true') return Promise.resolve();
@@ -126,7 +129,7 @@
           const script = document.createElement('script');
           script.id = SCRIPT_ID;
           script.async = true;
-          script.src = clean(SCRIPT);
+          script.src = scriptUrl;
           script.onload = () => {
             script.dataset.loaded = 'true';
             resolve();
@@ -135,6 +138,9 @@
           document.body.appendChild(script);
         });
       }
+
+      const hasWidgetContent = (widgetEl) =>
+        widgetEl.children.length > 0 || widgetEl.textContent.trim().length > 0;
 
       async function init() {
         let timeout = null;
@@ -188,5 +194,3 @@
     </script>
   </body>
 </html>
-        const hasWidgetContent = (widgetEl) =>
-          widgetEl.children.length > 0 || widgetEl.textContent.trim().length > 0;
