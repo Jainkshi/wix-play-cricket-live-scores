@@ -82,9 +82,19 @@
       function buildUrl() {
         const type = cleanValue(CONFIG.widgetType).toLowerCase();
         const params = new URLSearchParams();
-        if (type === 'club') params.set('club_id', cleanValue(CONFIG.clubId));
-        else if (type === 'team') params.set('team_id', cleanValue(CONFIG.teamId));
-        else if (type === 'division') params.set('division_id', cleanValue(CONFIG.divisionId));
+        if (type === 'club') {
+          const clubId = cleanValue(CONFIG.clubId);
+          if (!clubId) throw new Error('clubId is required when widgetType is club.');
+          params.set('club_id', clubId);
+        } else if (type === 'team') {
+          const teamId = cleanValue(CONFIG.teamId);
+          if (!teamId) throw new Error('teamId is required when widgetType is team.');
+          params.set('team_id', teamId);
+        } else if (type === 'division') {
+          const divisionId = cleanValue(CONFIG.divisionId);
+          if (!divisionId) throw new Error('divisionId is required when widgetType is division.');
+          params.set('division_id', divisionId);
+        }
         else throw new Error('widgetType must be club, team, or division.');
         params.set('days', String(Number.isFinite(Number(CONFIG.days)) ? Number(CONFIG.days) : 0));
         return clean(BASE) + '?' + params.toString();
@@ -92,10 +102,12 @@
 
       function injectCssOnce() {
         if (document.getElementById(CSS_ID)) return;
+        const cssUrl = clean(CSS);
+        if (!cssUrl.startsWith('https://')) throw new Error('Widget CSS URL must use https://');
         const link = document.createElement('link');
         link.id = CSS_ID;
         link.rel = 'stylesheet';
-        link.href = clean(CSS);
+        link.href = cssUrl;
         document.head.appendChild(link);
       }
 
@@ -149,7 +161,7 @@
 
           let done = false;
           observer = new MutationObserver(() => {
-            if (!done && (widgetEl.children.length || widgetEl.textContent.trim())) {
+            if (!done && hasWidgetContent(widgetEl)) {
               done = true;
               observer.disconnect();
               clearTimeout(timeout);
@@ -159,7 +171,7 @@
           observer.observe(widgetEl, { childList: true, subtree: true, characterData: true });
 
           timeout = setTimeout(() => {
-            if (!done && !widgetEl.children.length && !widgetEl.textContent.trim()) {
+            if (!done && !hasWidgetContent(widgetEl)) {
               done = true;
               observer.disconnect();
               setStatus('empty', 'No live match available right now.');
@@ -176,3 +188,5 @@
     </script>
   </body>
 </html>
+        const hasWidgetContent = (widgetEl) =>
+          widgetEl.children.length > 0 || widgetEl.textContent.trim().length > 0;
