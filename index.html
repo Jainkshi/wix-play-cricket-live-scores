@@ -1,110 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Scores - Widget Panel</title>
-  <style>
-    :root {
-      --bg: #f5f7fb;
-      --panel: #ffffff;
-      --text: #0f172a;
-      --muted: #475569;
-      --border: #dbe2ea;
-      --accent: #1d4ed8;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Live Scores</title>
 
-    * { box-sizing: border-box; }
+    <!-- Play-Cricket Widget CSS -->
+    <link rel="stylesheet" href="https://www.play-cricket.com/live_scorer_widgets.css">
 
-    body {
-      margin: 0;
-      font-family: Inter, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
 
-    .shell {
-      margin: 0 auto;
-      max-width: 1060px;
-      padding: clamp(14px, 2.8vw, 28px);
-    }
+        h1 {
+            background-color: #1e3a5f;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-      padding: clamp(14px, 2.2vw, 24px);
-    }
-
-    h1 {
-      font-size: clamp(1.35rem, 2.5vw, 1.9rem);
-      margin: 0;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      line-height: 1.55;
-      margin: 8px 0 18px;
-    }
-
-    .help {
-      color: var(--muted);
-      font-size: 0.92rem;
-      margin-top: 14px;
-    }
-
-    .help a {
-      color: var(--accent);
-    }
-  </style>
+        .widget-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
-  <main class="shell">
-    <section class="panel">
-      <h1>Scores</h1>
-      <p class="subtitle">Live score for 1st XI match.</p>
 
-      <!-- Official Play-Cricket pattern -->
-      <a
-        style="display:none;"
-        class="lsw"
-        href="https://www.play-cricket.com/embed_widget/live_scorer_widgets?team_id=362428&days=0"
-        id="lsw_link_40224">
-      </a>
+    <h1>Team Live Scores</h1>
 
-      <div
-        class="lsw-col-12 lsw_tile"
-        id="lsw_container_40224">
-      </div>
+    <div class="widget-container">
+        <div class="play-cricket-widget">
+            <a href="https://www.play-cricket.com/embed_widget/live_scorer_widgets?team_id=362428&days=0">
+                Loading scores...
+            </a>
+        </div>
+    </div>
 
-      <p class="help">
-        If scores are not currently available, there may be no live match in progress.
-        <a href="https://www.play-cricket.com/" target="_blank" rel="noopener noreferrer">Open Play-Cricket</a>
-      </p>
-    </section>
-  </main>
+    <!-- Play-Cricket Widget JS -->
+    <script src="https://www.play-cricket.com/live_scorer_widgets.js"></script>
 
-  <script>
-    (function loadCSSIfNeeded() {
-      for (const sheet of document.styleSheets) {
-        if (sheet.href === 'https://www.play-cricket.com/live_scorer.css') return;
-      }
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://www.play-cricket.com/live_scorer.css';
-      document.head.appendChild(link);
-    })();
-
-    (function loadScriptIfNeeded(d, s, id) {
-      const existing = d.getElementById(id);
-      if (existing) return;
-      const js = d.createElement(s);
-      js.id = id;
-      js.src = 'https://www.play-cricket.com/live_scorer.js';
-      const firstScript = d.getElementsByTagName(s)[0];
-      firstScript.parentNode.insertBefore(js, firstScript);
-    })(document, 'script', 'lsw-wjs');
-  </script>
 </body>
 </html>
