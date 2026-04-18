@@ -1,160 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Live Scores Hub Demo</title>
-    <style>
-      :root {
-        --bg: #f4f7fb;
-        --panel: #ffffff;
-        --text: #0f172a;
-        --muted: #475569;
-        --line: #dbe2ea;
-        --primary: #1d4ed8;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Scores - Widget Panel</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #dbe2ea;
+      --accent: #1d4ed8;
+    }
 
-      * {
-        box-sizing: border-box;
-      }
+    * { box-sizing: border-box; }
 
-      body {
-        margin: 0;
-        font-family: Inter, Arial, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        padding: clamp(16px, 2.5vw, 28px);
-      }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
 
-      .shell {
-        margin: 0 auto;
-        max-width: 1160px;
-      }
+    .shell {
+      margin: 0 auto;
+      max-width: 1060px;
+      padding: clamp(14px, 2.8vw, 28px);
+    }
 
-      .hero,
-      .selector,
-      .widget,
-      .help {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-        margin-bottom: 16px;
-        padding: clamp(14px, 2.2vw, 22px);
-      }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+      padding: clamp(14px, 2.2vw, 24px);
+    }
 
-      h1 {
-        margin: 0;
-        font-size: clamp(1.4rem, 2.3vw, 2rem);
-      }
+    h1 {
+      font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+      margin: 0;
+    }
 
-      .hero p {
-        color: var(--muted);
-        margin: 8px 0 0;
-      }
+    .subtitle {
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 8px 0 18px;
+    }
 
-      .selector-buttons {
-        display: grid;
-        gap: 10px;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      }
+    .help {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 14px;
+    }
 
-      button {
-        background: #eef2ff;
-        border: 1px solid #c7d2fe;
-        border-radius: 10px;
-        color: #1e3a8a;
-        cursor: pointer;
-        font: inherit;
-        padding: 10px 12px;
-      }
+    .help a {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="panel">
+      <h1>Scores</h1>
+      <p class="subtitle">Live score for 1st XI match.</p>
 
-      button.active {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: #fff;
-      }
+      <!-- Official Play-Cricket pattern -->
+      <a
+        style="display:none;"
+        class="lsw"
+        href="https://www.play-cricket.com/embed_widget/live_scorer_widgets?club_id=1312&days=0"
+        id="lsw_link_40224">
+      </a>
 
-      .widget iframe {
-        border: 0;
-        border-radius: 10px;
-        display: block;
-        min-height: 950px;
-        width: 100%;
-      }
+      <div
+        class="lsw-col-12 lsw_tile"
+        id="lsw_container_40224">
+      </div>
 
-      .help {
-        color: var(--muted);
-        font-size: 0.94rem;
-        line-height: 1.55;
-      }
-
-      .help a {
-        color: var(--primary);
-      }
-
-      @media (max-width: 768px) {
-        .widget iframe {
-          min-height: 1100px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <main class="shell">
-      <section class="hero">
-        <h1>Live Scores</h1>
-        <p>Follow club, team, and division scores in one place.</p>
-      </section>
-
-      <section class="selector" aria-label="Score selector">
-        <div class="selector-buttons">
-          <button type="button" data-file="club-widget.html" class="active">Club Scores</button>
-          <button type="button" data-file="team-widget.html">1st XI</button>
-          <button type="button" data-file="team-widget.html">2nd XI</button>
-          <button type="button" data-file="team-widget.html">Women’s XI</button>
-          <button type="button" data-file="division-widget.html">Division 1</button>
-          <button type="button" data-file="division-widget.html">Division 2</button>
-        </div>
-      </section>
-
-      <section class="widget" aria-label="Live score panel">
-        <iframe
-          id="widgetFrame"
-          title="Selected live scores widget"
-          src="./club-widget.html"
-        ></iframe>
-      </section>
-
-      <section class="help">
+      <p class="help">
         If scores are not currently available, there may be no live match in progress.
-        You can also verify updates directly on
-        <a href="https://www.play-cricket.com/" target="_blank" rel="noopener noreferrer">Play-Cricket</a>.
-      </section>
-    </main>
+        <a href="https://www.play-cricket.com/" target="_blank" rel="noopener noreferrer">Open Play-Cricket</a>
+      </p>
+    </section>
+  </main>
 
-    <script>
-      const buttons = Array.from(document.querySelectorAll('button[data-file]'));
-      const widgetFrame = document.getElementById('widgetFrame');
-      const allowedFiles = new Map([
-        ['club-widget.html', './club-widget.html'],
-        ['team-widget.html', './team-widget.html'],
-        ['division-widget.html', './division-widget.html']
-      ]);
+  <script>
+    (function loadCSSIfNeeded() {
+      for (const sheet of document.styleSheets) {
+        if (sheet.href === 'https://www.play-cricket.com/live_scorer.css') return;
+      }
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://www.play-cricket.com/live_scorer.css';
+      document.head.appendChild(link);
+    })();
 
-      buttons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const file = (button.dataset.file || '').trim();
-          const safePath = allowedFiles.get(file);
-          if (!safePath) return;
-          const safeUrl = new URL(safePath, window.location.href);
-          if (safeUrl.origin !== window.location.origin) return;
-
-          buttons.forEach((b) => b.classList.remove('active'));
-          button.classList.add('active');
-          widgetFrame.src = safeUrl.toString();
-        });
-      });
-    </script>
-  </body>
+    (function loadScriptIfNeeded(d, s, id) {
+      const existing = d.getElementById(id);
+      if (existing) return;
+      const js = d.createElement(s);
+      js.id = id;
+      js.src = 'https://www.play-cricket.com/live_scorer.js';
+      const firstScript = d.getElementsByTagName(s)[0];
+      firstScript.parentNode.insertBefore(js, firstScript);
+    })(document, 'script', 'lsw-wjs');
+  </script>
+</body>
 </html>
